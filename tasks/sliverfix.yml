@@ -1,3 +1,13 @@
+- name: Debug OS Information
+  ansible.builtin.debug:
+    msg:
+      - "Distribution: {{ ansible_distribution }}"
+      - "Distribution Version: {{ ansible_distribution_version }}"
+      - "Distribution Major Version: {{ ansible_distribution_major_version | default('N/A') }}"
+      - "Architecture: {{ ansible_architecture }}"
+  tags:
+    - install
+
 - name: Install packages for sliverfix
   become: true
   ansible.builtin.package:
@@ -50,6 +60,32 @@
     - pip
     - grpc
 
+- name: Download the GRPC patch
+  ansible.builtin.get_url:
+    url: "{{ grpc_patch_url }}"
+    dest: "{{ attackmate_grpc_dest }}"
+    mode: '0644'
+  register: download_result
+  ignore_errors: true
+  tags:
+    - install
+    - pip
+    - grpc
+
+- name: "Debug: Show the full result of the get_url task"
+  ansible.builtin.debug:
+    var: download_result
+
+- name: Install grpc patch
+  ansible.builtin.shell:
+    chdir: "{{ attackmate_grpc_dest }}"
+    cmd: ". {{ attackmate_dest }}/venv/bin/activate && pip install current"
+  tags:
+    - install
+    - pip
+    - grpc
+  when: download_result.status_code | default(404) == 200
+
 - name: Compile grpc
   ansible.builtin.shell:
     chdir: "{{ attackmate_grpc_dest }}"
@@ -58,6 +94,7 @@
     - install
     - pip
     - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Install protobuf
   ansible.builtin.pip:
@@ -76,7 +113,6 @@
     - install
     - pip
     - grpc
-
 
 - name: Lock sliverfix
   ansible.builtin.shell:
