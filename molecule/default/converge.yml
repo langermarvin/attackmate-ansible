@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  become: true # Or false, depending on your role's needs
+  vars:
+    # Define any variables needed for your role during testing
+    # my_role_variable: "test_value"
+  roles:
+    - role: "attackmate-ansible"
+

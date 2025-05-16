@@ -1,0 +1,43 @@
+---
+- name: Destroy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  # no_log: "{{ molecule_no_log }}"
+  tasks:
+    - name: Get information about Docker containers
+      community.docker.docker_container_info:
+        # Directly use 'item' here to construct the container name
+        name: "{{ item.name }}" # Assuming 'name' is the key in your molecule_yml.platforms
+      register: molecule_containers
+      loop: "{{ molecule_yml.platforms }}" # This loops over your defined platforms
+      loop_control:
+        loop_var: item # Good practice to explicitly name the loop variable
+
+    - name: Stop and remove Docker containers
+      community.docker.docker_container:
+        name: "{{ container_item.Name | regex_replace('^/', '') }}" # Ensure we are using the correct item from this loop
+        state: absent
+        force_kill: true
+      # Loop over the 'containers' list from each result of the previous task
+      loop: "{{ molecule_containers.results | sum(attribute='containers', start=[]) }}"
+      loop_control:
+        loop_var: container_item # Use a different loop_var name to avoid confusion
+      when:
+        - container_item is defined
+        - container_item.Name is defined
+    # Mandatory configuration for Molecule to function.
+
+    - name: Populate instance config
+      ansible.builtin.set_fact:
+        instance_conf: {}
+
+    - name: Dump instance config
+      ansible.builtin.copy:
+        content: |
+          # Molecule managed
+
+          {{ instance_conf | to_json | from_json | to_yaml }}
+        dest: "{{ molecule_instance_config }}"
+        mode: "0600"
+      when: server.changed | default(false) | bool  # noqa no-handler

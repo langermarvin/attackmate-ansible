@@ -8,48 +8,6 @@
   tags:
     - install
 
-- name: Install packages for sliverfix
-  become: true
-  ansible.builtin.package:
-    name: "{{ attackmate_dev_packages }}"
-  tags:
-    - install
-    - dependencies
-
-- name: Install grpc requirements
-  ansible.builtin.pip:
-    requirements: "requirements.txt"
-    chdir: "{{ attackmate_grpc_dest }}"
-    virtualenv: "{{ attackmate_dest }}/venv"
-  tags:
-    - install
-    - pip
-    - grpc
-
-- name: Uninstall protobuf
-  ansible.builtin.pip:
-    name: protobuf
-    chdir: "{{ attackmate_grpc_dest }}"
-    virtualenv: "{{ attackmate_dest }}/venv"
-    extra_args: "--yes"
-    state: absent
-  tags:
-    - install
-    - pip
-    - grpc
-
-- name: Uninstall grpcio-tools
-  ansible.builtin.pip:
-    name: grpcio-tools
-    chdir: "{{ attackmate_grpc_dest }}"
-    virtualenv: "{{ attackmate_dest }}/venv"
-    extra_args: "--yes"
-    state: absent
-  tags:
-    - install
-    - pip
-    - grpc
-
 - name: Download the GRPC patch
   ansible.builtin.get_url:
     url: "{{ grpc_patch_url }}"
@@ -62,10 +20,6 @@
     - pip
     - grpc
 
-- name: "Debug: Show the full result of the get_url task"
-  ansible.builtin.debug:
-    var: download_result
-
 - name: Install grpc patch
   ansible.builtin.shell:
     chdir: "{{ attackmate_grpc_dest }}"
@@ -75,6 +29,52 @@
     - pip
     - grpc
   when: download_result.status_code | default(404) == 200
+
+- name: Install packages for sliverfix
+  become: true
+  ansible.builtin.package:
+    name: "{{ attackmate_dev_packages }}"
+  tags:
+    - install
+    - dependencies
+  when: download_result.status_code | default(404) != 200
+
+- name: Install grpc requirements
+  ansible.builtin.pip:
+    requirements: "requirements.txt"
+    chdir: "{{ attackmate_grpc_dest }}"
+    virtualenv: "{{ attackmate_dest }}/venv"
+  tags:
+    - install
+    - pip
+    - grpc
+  when: download_result.status_code | default(404) != 200
+
+- name: Uninstall protobuf
+  ansible.builtin.pip:
+    name: protobuf
+    chdir: "{{ attackmate_grpc_dest }}"
+    virtualenv: "{{ attackmate_dest }}/venv"
+    extra_args: "--yes"
+    state: absent
+  tags:
+    - install
+    - pip
+    - grpc
+  when: download_result.status_code | default(404) != 200
+
+- name: Uninstall grpcio-tools
+  ansible.builtin.pip:
+    name: grpcio-tools
+    chdir: "{{ attackmate_grpc_dest }}"
+    virtualenv: "{{ attackmate_dest }}/venv"
+    extra_args: "--yes"
+    state: absent
+  tags:
+    - install
+    - pip
+    - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Git checkout grpc
   ansible.builtin.git:

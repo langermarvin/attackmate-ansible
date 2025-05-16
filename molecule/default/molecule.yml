@@ -1,0 +1,75 @@
+---
+role_name_check: 2
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance-kali
+    image: kalilinux/kali-rolling # Or a specific tagged version if preferred
+    ansible_user: root
+    pre_build_image: true          # Pulls image beforehand
+      #    privileged: false              # Set to true only if role needs advanced permissions
+      #    command: ""                    # Override default container command if needed (often /sbin/init for systemd) - may not be needed for basic roles
+  - name: instance-ubuntu2204
+    image: ubuntu:22.04
+    ansible_user: root
+    pre_build_image: true
+      #    privileged: false
+      #    command: ""
+  - name: instance-ubuntu2404
+    image: ubuntu:24.04
+    ansible_user: root
+    pre_build_image: true
+      #    privileged: false---
+role_name_check: 2
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance-kali
+    image: kalilinux/kali-rolling # Or a specific tagged version if preferred
+    ansible_user: root
+    pre_build_image: true          # Pulls image beforehand
+      #    privileged: false              # Set to true only if role needs advanced permissions
+      #    command: ""                    # Override default container command if needed (often /sbin/init for systemd) - may not be needed for basic roles
+  - name: instance-ubuntu2204
+    image: ubuntu:22.04
+    ansible_user: root
+    pre_build_image: true
+      #    privileged: false
+      #    command: ""
+  - name: instance-ubuntu2404
+    image: ubuntu:24.04
+    ansible_user: root
+    pre_build_image: true
+      #    privileged: false
+      #    command: ""
+  - name: instance-debian12
+    image: debian:12
+    ansible_user: root
+    pre_build_image: true
+      #    privileged: false
+      #    command: ""     
+provisioner:
+  name: ansible
+  ANSIBLE_ROLES_PATH: "/home/ubuntu/aecid_roles/"
+  config_options:
+    defaults:
+      # Fix for temporary directory issue
+      remote_tmp: /tmp/.ansible-${USER}-tmp 
+verifier:
+  name: ansible # Use ansible for verification tests
+scenario:
+  test_sequence: # Default sequence
+    - destroy
+    - dependency # Installs role dependencies (e.g., from galaxy)
+    - syntax   # Checks ansible syntax
+    - create   # Creates containers
+    - prepare  # Runs prepare playbook (see step 5)
+    - converge # Runs your role
+    - idempotence # Runs your role again
+    - verify   # Runs verification playbook
+    - destroy  # Cleans up containers
+
