@@ -16,16 +16,6 @@
     - install
     - dependencies
 
-- name: Git checkout grpc
-  ansible.builtin.git:
-    repo: "https://github.com/grpc/grpc"
-    dest: "{{ attackmate_grpc_dest }}"
-    version: "master"
-  tags:
-    - install
-    - git
-    - grpc
-
 - name: Install grpc requirements
   ansible.builtin.pip:
     requirements: "requirements.txt"
@@ -85,6 +75,17 @@
     - pip
     - grpc
   when: download_result.status_code | default(404) == 200
+
+- name: Git checkout grpc
+  ansible.builtin.git:
+    repo: "https://github.com/grpc/grpc"
+    dest: "{{ attackmate_grpc_dest }}"
+    version: "master"
+  tags:
+    - install
+    - git
+    - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Compile grpc
   ansible.builtin.shell:
