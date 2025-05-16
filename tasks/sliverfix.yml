@@ -114,6 +114,7 @@
     - install
     - pip
     - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Lock sliverfix
   ansible.builtin.shell:
