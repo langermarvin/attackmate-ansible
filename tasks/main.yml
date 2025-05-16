@@ -9,6 +9,11 @@
   when: ansible_distribution == "Ubuntu"
   tags: vars
 
+- name: Include Kali Variables
+  include_vars: kali.yml
+  when: ansible_distribution == "Kali"
+  tags: vars
+
 # tasks file for ansible-attackmate
 - name: Install packages for attackmate
   become: true
