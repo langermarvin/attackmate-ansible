@@ -76,6 +76,8 @@ Requirements to run Molecule:
    uv run molecule test
    ```
 
+Additionally a github action is specified to do a molecule test run after a sucessfull push
+
 ## License
 
 GPL-3.0

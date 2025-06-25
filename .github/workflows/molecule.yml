@@ -17,14 +17,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install uv
+      - name: Install uv and dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           uv venv
-          source .venv/bin/activate
           uv pip install molecule ansible molecule-docker
 
       - name: Run Molecule tests
         run: |
-          source .venv/bin/activate
-          molecule test
+          uv run molecule test
