@@ -84,8 +84,6 @@ Requirements to run Molecule:
 
 Additionally a github action for molecule tests is being triggered on push and pull requests.
 
-Additionally a github action is specified to do a molecule test run after a sucessfull push
-
 ## License
 
 GPL-3.0
