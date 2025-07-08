@@ -5,10 +5,10 @@ dependency:
 driver:
   name: docker
 platforms:
- - name: instance-kali
-   image: kalilinux/kali-rolling # Or a specific tagged version if preferred
-   ansible_user: root
-   pre_build_image: true          # Pulls image beforehand
+# - name: instance-kali
+#   image: kalilinux/kali-rolling # Or a specific tagged version if preferred
+#   ansible_user: root
+#   pre_build_image: true          # Pulls image beforehand
  - name: instance-ubuntu2204
    image: ubuntu:22.04
    ansible_user: root
